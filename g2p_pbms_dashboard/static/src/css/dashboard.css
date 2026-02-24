@@ -1,0 +1,269 @@
+/* ===== Professional Enterprise Dashboard ===== */
+
+:root {
+    /* Palette: Corporate Blue & Slate */
+    --z-sidebar-bg: #0f172a;      /* Darkest Navy */
+
+    --z-sidebar-width: 260px;
+    --z-chart-panel-width: 520px;
+    
+    --z-primary: #2563eb;         /* Professional Blue */
+    --z-primary-hover: #1d4ed8;
+    
+    --z-bg-body: #f8fafc;         /* Very Light Grey/White */
+    --z-border: #e2e8f0;
+    --z-text-main: #334155;
+    --z-text-light: #64748b;
+    
+}
+
+.o_zanzibar_dashboard {
+    display: flex;
+    height: 95vh;
+    width: 100vw;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--z-bg-body);
+    color: var(--z-text-main);
+    overflow: hidden;
+}
+
+/* ----- 1. SIDEBAR (Dark Professional) ----- */
+.o_dashboard_sidebar {
+    width: var(--z-sidebar-width);
+    background: var(--z-sidebar-bg);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 2rem;
+    flex-shrink: 0;
+    z-index: 50;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.o_sidebar_header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    letter-spacing: 0.5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Sidebar KPI */
+.o_sidebar_kpi {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1.5rem 0;
+    text-align: left;
+}
+.o_kpi_label_sidebar {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+.o_kpi_val_sidebar {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Sidebar Inputs */
+.o_sidebar_section_title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+}
+
+.o_input_label {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.o_prof_select {
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    outline: none;
+    font-size: 0.9rem;
+}
+.o_prof_select:focus { border-color: var(--z-primary); }
+
+.o_btn_apply {
+    width: 100%;
+    padding: 10px;
+    background: var(--z-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.o_btn_apply:hover { background: var(--z-primary-hover); }
+
+.o_btn_clear {
+    background: transparent;
+    color: #cbd5e1;
+    border: none;
+    text-decoration: underline;
+    width: 100%;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.o_btn_clear:hover { color: #fff; }
+
+
+/* ----- 2. MAIN AREA ----- */
+.o_dashboard_main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+/* --- LEFT PANEL: CHART GRID --- */
+.o_main_charts_section {
+    width: var(--z-chart-panel-width);
+    background: #f1f5f9;
+    padding: 1.25rem;
+    border-right: 1px solid var(--z-border);
+    overflow-y: auto;
+    flex-shrink: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-content: start;           /* prevents stretching issues */
+}
+/* Generic Card Style */
+.o_chart_card {
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;               /* important */
+}
+
+.o_chart_header {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.o_chart_header .title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.o_chart_body {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 0;                  /* CRITICAL fix for flex overflow */
+    padding: 0.75rem;
+    overflow: hidden;
+}
+
+/* === GRID PLACEMENT === */
+.o_card_age {
+    grid-column: 1 / 2;
+}
+
+.o_card_gender {
+    grid-column: 2 / 3;
+}
+
+.o_card_region {
+    grid-column: 1 / -1;            /* span both columns */
+    min-height: 380px;              /* more space for bar chart */
+}
+
+.o_card_region .o_chart_body {
+    padding: 5rem 1.25rem 1.25rem;
+}
+/* --- RIGHT PANEL: MAP --- */
+.o_main_map_section {
+    flex: 1;
+    position: relative;
+    background: #e2e8f0;
+}
+
+.o_map_container {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.o_map_loader {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--z-text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Floating KPI Card on Map */
+.o_map_kpi_floating {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 900;
+    min-width: 220px;
+
+    background: linear-gradient(
+        135deg,
+        #2563eb 0%,
+        #1e40af 100%
+    );
+
+    color: #fff;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+
+    box-shadow: 
+        0 10px 25px rgba(37, 99, 235, 0.35),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+
+    backdrop-filter: blur(6px);
+}
+
+.o_map_kpi_label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    margin-bottom: 4px;
+}
+
+.o_map_kpi_value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+}

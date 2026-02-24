@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="g2p_pbms_dashboard.MapComponent">
+        <div t-ref="map" class="o_map_container" style="height: 100%; min-height: 500px; width: 100%; border-radius: 8px; z-index: 0;"></div>
+    </t>
+</templates>

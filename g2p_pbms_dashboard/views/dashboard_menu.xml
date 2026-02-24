@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+   <record id="pbms_dashboard_action" model="ir.actions.client">
+      <field name="name">PBMS Dashboard</field>
+      <field name="tag">pbms_dashboard_main</field>
+   </record>
+
+   <menuitem
+        name="Dashboard"
+        id="menu_pbms_dashboard"
+        sequence="0"
+        action="pbms_dashboard_action"
+        parent="g2p_pbms.menu_g2p_root"
+    />
+</odoo>

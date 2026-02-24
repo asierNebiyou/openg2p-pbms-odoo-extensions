@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="g2p_pbms_dashboard.KpiTemplate" owl="1">
+        <div class="o_kpi_inner">
+            <div class="o_kpi_icon">
+                <i t-att-class="props.icon_class" />
+            </div>
+            <div class="o_kpi_content">
+                <div class="o_kpi_value"><t t-esc="props.data" /></div>
+                <div class="o_kpi_title"><t t-esc="props.title" /></div>
+            </div>
+        </div>
+    </t>
+</templates>

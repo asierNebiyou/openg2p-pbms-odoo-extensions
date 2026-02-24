@@ -1,0 +1,14 @@
+<templates>
+    <t t-name="g2p_pbms_dashboard.ChartTemplate" owl="1">
+        <div class="o_chart_root" t-att-class="props.size">
+            <h3
+                t-if="props.title"
+                t-esc="props.title"
+                class="o_chart_optional_title"
+            />
+            <div class="o_chart_canvas_wrap">
+                <canvas t-ref="canvas" />
+            </div>
+        </div>
+    </t>
+</templates>

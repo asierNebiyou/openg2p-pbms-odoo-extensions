@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="g2p_pbms_dashboard.PBMSMainLayout">
+        <div class="o_zanzibar_dashboard">
+            <div class="o_dashboard_sidebar">
+                <div class="o_sidebar_header">
+                    <h1>
+                        <i class="fa fa-dashboard" />
+                        <span> PBMS Dashboard</span>
+                    </h1>
+                </div>
+
+                <div class="o_sidebar_filters">
+                    <div class="o_sidebar_section_title">Refine Data</div>
+
+                    <label class="o_input_label">Program</label>
+                    <select class="o_prof_select"
+                        t-on-change="(ev) => this.setFilterProgram(ev.target.value || null)">
+                        <option value="">All Programs</option>
+                        <t t-foreach="state.programs" t-as="program" t-key="program.id">
+                            <option t-att-value="program.id" t-att-selected="state.filters.program_id == program.id">
+                                <t t-esc="program.name"/>
+                            </option>
+                        </t>
+                    </select>
+
+                    <label class="o_input_label">Gender</label>
+                    <select class="o_prof_select"
+                        t-on-change="(ev) => this.setFilterGender(ev.target.value || null)">
+                        <option value="">All Genders</option>
+                        <option value="male" t-att-selected="state.filters.gender == 'male'">Male</option>
+                        <option value="female" t-att-selected="state.filters.gender == 'female'">Female</option>
+                    </select>
+
+                    <label class="o_input_label">Age Bracket</label>
+                    <select class="o_prof_select"
+                        t-on-change="(ev) => this.setFilterAgeBucket(ev.target.value || null)">
+                        <option value="">All Ages</option>
+                        <option value="18-69" t-att-selected="state.filters.age_bucket == '18-69'">18 - 69</option>
+                        <option value="70-75" t-att-selected="state.filters.age_bucket == '70-75'">70 - 75</option>
+                        <option value="76-80" t-att-selected="state.filters.age_bucket == '76-80'">76 - 80</option>
+                        <option value="81-85" t-att-selected="state.filters.age_bucket == '81-85'">81 - 85</option>
+                        <option value="86-90" t-att-selected="state.filters.age_bucket == '86-90'">86 - 90</option>
+                        <option value="91-95" t-att-selected="state.filters.age_bucket == '91-95'">91 - 95</option>
+                        <option value="96-100" t-att-selected="state.filters.age_bucket == '96-100'">96 - 100</option>
+                        <option value="101+" t-att-selected="state.filters.age_bucket == '101+'"> &gt; 100</option>
+                    </select>
+
+                    <button class="o_btn_apply mt-3" t-on-click="fetchData">
+                        Apply Filters
+                    </button>
+
+                    <t t-if="hasActiveFilters">
+                        <button class="o_btn_clear" t-on-click="clearFilters">
+                            Reset View
+                        </button>
+                    </t>
+                </div>
+            </div>
+
+            <div class="o_dashboard_main">
+                <div class="o_main_map_section">
+                    <MapComponent
+                        data="state.map_data"
+                        filters="state.filters"
+                        onMapClick="applyFilterFromMap"
+                    />
+                    <div class="o_map_kpi_floating">
+                        <div class="o_map_kpi_label">Enrolled Beneficiaries</div>
+                        <div class="o_map_kpi_value">
+                            <t t-esc="state.kpi.total_enrolled || 0" />
+                        </div>
+                        <div class="o_map_kpi_label mt-3">Disbursed Amount</div>
+                        <div class="o_map_kpi_value">
+                            <t t-esc="state.kpi.total_disbursed_amount.toLocaleString() || 0" />
+                        </div>
+                        <div class="o_map_kpi_label mt-3">Budget Allocated</div>
+                        <div class="o_map_kpi_value" style="font-size: 1.5rem;">
+                            <t t-esc="state.kpi.total_budget_allocated.toLocaleString() || 0" />
+                        </div>
+                    </div>
+
+                    <div t-if="state.loading" class="o_map_loader">
+                        <i class="fa fa-spinner fa-spin" />
+                        <span>Updating Data...</span>
+                    </div>
+                </div>
+                <div class="o_main_charts_section" t-if="!state.loading">
+                    <div class="o_chart_card o_card_age">
+                        <div class="o_chart_header"><span class="title">Age Distribution</span></div>
+                        <div class="o_chart_body">
+                            <ChartComponent
+                                type="'pie'"
+                                data_label="'Count'"
+                                labels="Object.keys(state.charts.age || {})"
+                                data="Object.values(state.charts.age || {})"
+                                options="{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }"
+                                chartType="'age'"
+                                onSegmentClick="applyFilterFromChart"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="o_chart_card o_card_gender">
+                        <div class="o_chart_header"><span class="title">Gender Distribution</span></div>
+                        <div class="o_chart_body">
+                            <ChartComponent
+                                type="'doughnut'"
+                                data_label="'Count'"
+                                labels="Object.keys(state.charts.gender || {})"
+                                data="Object.values(state.charts.gender || {})"
+                                backgroundColor="['#1e40af', '#94a3b8']"
+                                options="{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12,padding: 12, font: { size: 11 } } } } }"
+                                chartType="'gender'"
+                                onSegmentClick="applyFilterFromChart"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="o_chart_card o_card_region">
+                        <div class="o_chart_header"><span class="title">Regional Distribution</span></div>
+                        <div class="o_chart_body">
+                            <ChartComponent
+                                t-if="state.charts.region_data"
+                                type="'bar'"
+                                labels="state.charts.region_data ? state.charts.region_data.labels || [] : []"
+                                data="(state.charts.region_data and state.charts.region_data.datasets and state.charts.region_data.datasets[0]) ? state.charts.region_data.datasets[0].data : []"
+                                data_label="'Registrations'"
+                                backgroundColor="['#3b82f6']"
+                                chartType="'region'"
+                                onSegmentClick="applyFilterFromChart"
+                                options="{ maintainAspectRatio: false, responsive: true,indexAxis: 'y', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12,padding: 12, font: { size: 11 } } } }, scales: { y: { grid: { color: '#f1f5f9' },tick:{display: false}, x: { grid: { display: false } } } } }"
+                            />
+                            <div t-else="" class="text-center text-muted small mt-4">No data available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
