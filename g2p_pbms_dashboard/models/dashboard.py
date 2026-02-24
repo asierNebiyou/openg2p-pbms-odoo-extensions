@@ -71,7 +71,7 @@ class PBMSDashboardLogic(models.Model):
             enrolled_ids = []
             if enrollment_uuids:
                 query_enrolled = f"""
-                    SELECT DISTINCT jsonb_array_elements(registrant_details)->>'registrant_id'
+                    SELECT DISTINCT jsonb_array_elements(registrant_details::jsonb)->>'registrant_id'
                     FROM beneficiary_list_details
                     WHERE beneficiary_list_id IN ({','.join(['%s']*len(enrollment_uuids))})
                 """
