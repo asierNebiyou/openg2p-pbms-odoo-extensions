@@ -14,6 +14,9 @@ export class MapComponent extends Component {
         this.currentLevel = "province";
         this.selectedProvinceCode = null;
         this.provinceData = {};
+        this.PEMBA_PROVINCE_CODES = ["TZ06", "TZ10"];
+        this.SHIFT_X = 0;
+        this.SHIFT_Y = -0.3;
 
         onWillStart(async () => {
             try {
@@ -35,26 +38,27 @@ export class MapComponent extends Component {
 
                 // --- CONFIGURATION ---
                 const zanzibarCodes = ["TZ06", "TZ07", "TZ10", "TZ11", "TZ15"];
-                const PEMBA_CODES = ["TZ06", "TZ10"]; 
-
-                const SHIFT_X = 0;
-                const SHIFT_Y = -0.3;
-
-                const transform = (f, code) =>
-                    PEMBA_CODES.includes(code) ? this.shiftFeature(f, SHIFT_X, SHIFT_Y) : f;
 
                 this.provinceGeoJson = {
                     type: "FeatureCollection",
                     features: fullProvinceData.features
                         .filter((f) => zanzibarCodes.includes(f.properties?.id))
-                        .map((f) => transform(f, f.properties.id)),
+                        .map((f) =>
+                            this.PEMBA_PROVINCE_CODES.includes(f.properties.id)
+                                ? this.shiftFeature(f, this.SHIFT_X, this.SHIFT_Y)
+                                : f
+                        ),
                 };
 
                 this.districtGeoJson = {
                     type: "FeatureCollection",
-                    features: fullDistrictData.features
+                    features: (fullDistrictData.features || [])
                         .filter((f) => zanzibarCodes.includes(f.properties?.province_code))
-                        .map((f) => transform(f, f.properties?.province_code)),
+                        .map((f) =>
+                            this.PEMBA_PROVINCE_CODES.includes(f.properties?.province_code)
+                                ? this.shiftFeature(f, this.SHIFT_X, this.SHIFT_Y)
+                                : f
+                        ),
                 };
 
                 this.provinceData = this.computeProvinceData(this.props.data || {});
@@ -69,15 +73,33 @@ export class MapComponent extends Component {
         onWillUpdateProps((nextProps) => {
             this.provinceData = this.computeProvinceData(nextProps.data || {});
 
-            if (!nextProps.filters.region && this.currentLevel === "district") {
-                this.currentLevel = "province";
-                this.selectedProvinceCode = null;
-                this.renderProvinceLayer();
+            if (!nextProps.filters.region) {
+                if (this.currentLevel !== "province") {
+                    this.currentLevel = "province";
+                    this.selectedProvinceCode = null;
+                    this.renderProvinceLayer();
+                } else {
+                    this.refreshCurrentLayer();
+                }
             } else {
-                this.refreshCurrentLayer();
+                const incomingCode = this.resolveProvinceCode(nextProps.filters.region);
+                if (incomingCode && incomingCode !== this.selectedProvinceCode) {
+                    this.currentLevel = "district";
+                    this.selectedProvinceCode = incomingCode;
+                    this.renderDistrictLayer(incomingCode);
+                } else {
+                    this.refreshCurrentLayer();
+                }
             }
         });
         onWillUnmount(() => this.map && this.map.remove());
+    }
+
+    onBackClick() {
+        if (this.currentLevel === "province") return;
+        if (this.props.onMapClick) {
+            this.props.onMapClick({ region: null, district: null });
+        }
     }
 
     shiftFeature(feature, dx, dy) {
@@ -90,15 +112,59 @@ export class MapComponent extends Component {
         };
     }
 
+    getFuzzyValue(shapeName, mapData) {
+        if (!mapData || typeof mapData !== 'object') return 0;
+        
+        // 1. Direct match (best case)
+        if (mapData[shapeName] !== undefined) return mapData[shapeName];
+
+        const sn = String(shapeName).toLowerCase().trim();
+        let total = 0;
+        let found = false;
+
+        // 2. Fuzzy match: Odoo might have "Magharibi A" but map has "Magharibi"
+        // We look for any keys that contain the shapeName as a whole word or prefix
+        for (const [key, value] of Object.entries(mapData)) {
+            const k = String(key).toLowerCase().trim();
+            if (k === sn || k.startsWith(sn + " ") || k.endsWith(" " + sn) || k.includes(" " + sn + " ")) {
+                total += value;
+                found = true;
+            }
+        }
+        
+        return found ? total : 0;
+    }
+
     computeProvinceData(mapData) {
         const result = {};
         if (!this.districtGeoJson?.features) return result;
         for (const f of this.districtGeoJson.features) {
             const d = f.properties?.shapeName;
             const p = f.properties?.province_code;
-            if (p) result[p] = (result[p] || 0) + (mapData[d] || 0);
+            if (p) {
+                const val = this.getFuzzyValue(d, mapData);
+                result[p] = (result[p] || 0) + val;
+            }
         }
         return result;
+    }
+
+    resolveProvinceCode(regionFilter) {
+        if (!regionFilter || !this.provinceGeoJson?.features) return null;
+        const rf = String(regionFilter).trim();
+        const rfLower = rf.toLowerCase();
+
+        // direct code match
+        const direct = this.provinceGeoJson.features.find(
+            (f) => String(f.properties?.id || "").toLowerCase() === rfLower
+        );
+        if (direct) return direct.properties.id;
+
+        // name match
+        const byName = this.provinceGeoJson.features.find(
+            (f) => String(f.properties?.name || "").toLowerCase() === rfLower
+        );
+        return byName ? byName.properties.id : null;
     }
 
     getGradientColor(baseColor, value, max = 1000) {
@@ -186,7 +252,9 @@ export class MapComponent extends Component {
                     },
 
                     click: () => {
-                        this.props.onMapClick({region: f.properties.name});
+                        if (this.props.onMapClick) {
+                            this.props.onMapClick({ region: f.properties.id, district: null });
+                        }
                         this.drillDownToProvince(f.properties.id);
                     },
                 });
@@ -229,7 +297,7 @@ export class MapComponent extends Component {
                 style: (f) => ({
                     fillColor: this.getGradientColor(
                         parentColor,
-                        this.props.data[f.properties.shapeName] || 0,
+                        this.getFuzzyValue(f.properties.shapeName, this.props.data),
                         500
                     ),
                     weight: 1.5,
@@ -237,7 +305,7 @@ export class MapComponent extends Component {
                     fillOpacity: 0.85,
                 }),
                 onEachFeature: (f, layer) => {
-                    const val = this.props.data[f.properties.shapeName] || 0;
+                    const val = this.getFuzzyValue(f.properties.shapeName, this.props.data);
 
                     this.addValueMarker(
                         layer.getBounds().getCenter(),
@@ -252,11 +320,13 @@ export class MapComponent extends Component {
                         mouseout: (e) => {
                             this.geoJsonLayer.resetStyle(e.target);
                         },
-                        click: (e) => {
-                            this.props.onMapClick({region: null});
-                            this.currentLevel = "province";
-                            this.selectedProvinceCode = null;
-                            this.renderProvinceLayer();
+                        click: () => {
+                            if (this.props.onMapClick) {
+                                this.props.onMapClick({
+                                    region: this.selectedProvinceCode,
+                                    district: f.properties.shapeName,
+                                });
+                            }
                         },
                     });
                 },

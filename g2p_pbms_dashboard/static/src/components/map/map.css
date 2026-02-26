@@ -72,3 +72,37 @@
 
 /* --- REMOVE LEAFLET CLUTTER --- */
 .leaflet-control-attribution { display: none !important; }
+
+.o_map_root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    border-radius: 8px;
+    z-index: 0;
+}
+
+.o_map_container {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 500px;
+    border-radius: 8px;
+}
+
+.o_map_back_btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 950;
+    background: rgba(15, 23, 42, 0.85);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 0.65rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+}
+.o_map_back_btn:hover {
+    background: rgba(15, 23, 42, 0.95);
+}

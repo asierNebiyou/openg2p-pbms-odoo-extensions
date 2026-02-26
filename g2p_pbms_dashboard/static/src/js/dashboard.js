@@ -10,6 +10,7 @@ import { KpiComponent } from "@g2p_pbms_dashboard/components/kpi/kpi";
 export class PBMSDashboard extends Component {
     setup() {
         this.orm = useService("orm");
+        this.dashboardType = this.props.action.context.dashboard_type || 'beneficiary';
         this.state = useState({
             kpi: {
                 total_enrolled: 0,
@@ -20,7 +21,9 @@ export class PBMSDashboard extends Component {
             charts: {
                 age: {},
                 gender: {},
-                region: {}
+                region: {},
+                monetary_program_data: {},
+                monetary_region_data: {},
             },
             map_data: {},
             programs: [],
@@ -64,7 +67,10 @@ export class PBMSDashboard extends Component {
                 "g2p.pbms.dashboard.logic",
                 "get_dashboard_data",
                 [],
-                { filters: this.state.filters }
+                { 
+                    filters: this.state.filters,
+                    dashboard_type: this.dashboardType
+                }
             );
             
             if (data) {
@@ -113,8 +119,14 @@ export class PBMSDashboard extends Component {
             const key = payload.label;
             this.state.filters.age_bucket = this.state.filters.age_bucket === key ? null : key;
         } else if (payload.chartType === "region") {
-            this.state.filters.region = this.state.filters.region === payload.label ? null : payload.label;
-            this.state.filters.district = null; 
+            const level = (this.state.charts?.region_data && this.state.charts.region_data.level) || "province";
+            const key = payload.key || payload.label;
+            if (level === "district") {
+                this.state.filters.district = this.state.filters.district === key ? null : key;
+            } else {
+                this.state.filters.region = this.state.filters.region === key ? null : key;
+                this.state.filters.district = null;
+            }
         }
         this.fetchData();
     }
@@ -122,14 +134,20 @@ export class PBMSDashboard extends Component {
     applyFilterFromMap(payload) {
         if (!payload) return;
         
-        if (payload.region !== undefined) {
+        let changed = false;
+        if (payload.region !== undefined && this.state.filters.region !== payload.region) {
             this.state.filters.region = payload.region;
             this.state.filters.district = null;
+            changed = true;
         }
-        if (payload.district !== undefined) {
+        if (payload.district !== undefined && this.state.filters.district !== payload.district) {
             this.state.filters.district = this.state.filters.district === payload.district ? null : payload.district;
+            changed = true;
         }
-        this.fetchData();
+        
+        if (changed) {
+            this.fetchData();
+        }
     }
 
     clearFilters() {

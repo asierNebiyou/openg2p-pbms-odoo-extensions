@@ -57,10 +57,15 @@ export class ChartComponent extends Component {
                     const index = elements[0].index;
                     const label = this.props.labels[index];
                     const value = this.props.data[index];
+                    const key =
+                        this.props.keys && this.props.keys.length > index
+                            ? this.props.keys[index]
+                            : label;
                     
                     this.props.onSegmentClick({
                         chartType: this.props.chartType,
                         label: label,
+                        key: key,
                         value: value
                     });
                 }
@@ -145,6 +150,7 @@ ChartComponent.template = "g2p_pbms_dashboard.ChartTemplate";
 ChartComponent.props = {
     type: { type: String, optional: true },
     labels: { type: Array, optional: true },
+    keys: { type: Array, optional: true },
     title: { type: String, optional: true },
     data_label: { type: String, optional: true },
     data: { type: Array, optional: true },

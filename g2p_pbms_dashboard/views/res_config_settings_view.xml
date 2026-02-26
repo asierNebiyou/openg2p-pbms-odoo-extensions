@@ -24,6 +24,23 @@
                             <field name="bg_task_db_name" />
                         </setting>
                     </block>
+                    <block title="Social Registry (SR) Database Configuration">
+                        <setting string="Host">
+                            <field name="sr_db_host" />
+                        </setting>
+                        <setting string="Port">
+                            <field name="sr_db_port" />
+                        </setting>
+                        <setting string="User">
+                            <field name="sr_db_user" />
+                        </setting>
+                        <setting string="Password">
+                            <field name="sr_db_password" password="True" />
+                        </setting>
+                        <setting string="Database Name">
+                            <field name="sr_db_name" />
+                        </setting>
+                    </block>
                 </app>
             </xpath>
         </field>

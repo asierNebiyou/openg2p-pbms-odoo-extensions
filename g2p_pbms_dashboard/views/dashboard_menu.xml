@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-   <record id="pbms_dashboard_action" model="ir.actions.client">
-      <field name="name">PBMS Dashboard</field>
+   <record id="pbms_beneficiary_dashboard_action" model="ir.actions.client">
+      <field name="name">Beneficiary Dashboard</field>
       <field name="tag">pbms_dashboard_main</field>
+      <field name="context">{'dashboard_type': 'beneficiary'}</field>
+   </record>
+
+   <record id="pbms_monetary_dashboard_action" model="ir.actions.client">
+      <field name="name">Monetary Dashboard</field>
+      <field name="tag">pbms_dashboard_main</field>
+      <field name="context">{'dashboard_type': 'monetary'}</field>
    </record>
 
    <menuitem
-        name="Dashboard"
-        id="menu_pbms_dashboard"
+        name="Dashboards"
+        id="menu_pbms_dashboard_root"
         sequence="0"
-        action="pbms_dashboard_action"
         parent="g2p_pbms.menu_g2p_root"
+    />
+
+   <menuitem
+        name="Beneficiary"
+        id="menu_pbms_beneficiary_dashboard"
+        sequence="1"
+        action="pbms_beneficiary_dashboard_action"
+        parent="menu_pbms_dashboard_root"
+    />
+
+   <menuitem
+        name="Amounts"
+        id="menu_pbms_monetary_dashboard"
+        sequence="2"
+        action="pbms_monetary_dashboard_action"
+        parent="menu_pbms_dashboard_root"
     />
 </odoo>
